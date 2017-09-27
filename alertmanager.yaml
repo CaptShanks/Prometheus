@@ -1,0 +1,16 @@
+
+global:
+
+route:
+  receiver: slack
+  routes:
+    -
+      match:
+       service: error
+      receiver: slack
+receivers:
+  -
+    name: slack
+    slack_configs:
+      - api_url: 'https://hooks.slack.com/services/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'
+        channel: '#promtheusbot'
