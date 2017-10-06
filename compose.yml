@@ -17,6 +17,17 @@ services:
       - '9090:9090'
     networks:
       - prometheus
+      
+  awsexporter:
+    image: shashanktyagi/cloudwatch-exporter
+    environment:
+      - AWS_ACCESS_KEY_ID=XXXXXX
+      - AWS_SECRET_ACCESS_KEY=XXXXXX
+    ports:
+      - '9106:9106'
+    volumes:
+      - '/home/ubuntu/cloudwatch-exporter/cloudwatch-exporter.yml:/config/config.yml'      
+  
 
   grafana:
     image: grafana/grafana
