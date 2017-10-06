@@ -1,0 +1,79 @@
+version: '3'
+
+networks:
+  prometheus:
+    driver: overlay
+
+services:
+  alertmanagercustom:
+   image: shashanktyagi/alert
+   ports:
+     - '9093:9093'
+   networks: 
+     - prometheus
+  awsexporter:
+    image: shashanktyagi/cloudwatch-exporter
+    environment:
+      - AWS_ACCESS_KEY_ID=xxxxxxxx
+      - AWS_SECRET_ACCESS_KEY=xxxxxx
+    ports: 
+      - '9106:9106'
+    volumes:
+      - '<absolute-path>/cloudwatch-exporter.yml:/config/config.yml'
+    networks:
+      - prometheus
+
+  prometheus:
+    image: shashanktyagi/prometheus
+    ports:
+      - '9090:9090'
+    networks:
+      - prometheus
+
+  grafana:
+    image: grafana/grafana
+    ports:
+      - '3000:3000'
+    networks:
+      - prometheus
+
+  node-exporter:
+    image: prom/node-exporter
+    deploy:
+      mode: global
+    ports:
+      - '9100:9100'
+    volumes:
+      - '/proc:/host/proc'
+      - '/sys:/host/sys'
+      - '/:/rootfs'
+    command:
+      - '-collector.procfs=/host/proc'
+      - '-collector.sysfs=/host/proc'
+      - '-collector.filesystem.ignored-mount-points="^/(sys|proc|dev|host|etc)($$|/)"'
+    networks:
+      - prometheus
+
+  cadvisor:
+    image: google/cadvisor:latest
+    deploy:
+      mode: global
+    ports:
+      - '8080:8080'
+    volumes:
+      - '/:/rootfs'
+      - '/var/run:/var/run'
+      - '/sys:/host/sys'
+      - '/var/lib/docker:/var/lib/docker'
+    networks:
+      - prometheus
+
+  engine-proxy:
+    image: basi/socat
+    deploy:
+      mode: global
+    ports:
+      - 4998:4999
+    networks:
+      - prometheus
+
